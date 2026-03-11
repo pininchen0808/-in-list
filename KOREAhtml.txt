@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>品inㄉ摳粒亞list</title>
+  <style>
+    :root {
+      --bg: #f5f2ed; /* 米色背景 */
+      --card: #ffffff; /* 白色卡片 */
+      --text: #1a1a1a; /* 近黑色文字 */
+      --muted: #8c8c8c; /* 灰色字 */
+      --primary: #1a1a1a; /* 主色：黑色 */
+      --accent: #d4a373; /* 輔助色：淺棕/金 */
+      --line: #e0ddd8;
+      --green: #4a5d4e; /* 深橄欖綠 */
+      --yellow: #c29b61; /* 芥末黃/米棕 */
+      --shadow: 0 4px 15px rgba(0,0,0,0.05);
+    }
+
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang TC", "Microsoft JhengHei", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+    }
+
+    .wrap {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 20px 14px 100px;
+    }
+
+    .header {
+      background: var(--primary);
+      color: #fff;
+      border-radius: 22px;
+      padding: 24px 20px 18px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+      margin-bottom: 16px;
+    }
+
+    .header h1 { margin: 0 0 6px; font-size: 26px; font-weight: 800; letter-spacing: 1px; }
+    .header p { margin: 0; opacity: .8; font-size: 14px; letter-spacing: 0.5px; }
+
+    .nav {
+      display: flex;
+      gap: 10px;
+      overflow-x: auto;
+      padding: 4px 2px 14px;
+      scrollbar-width: none;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: var(--bg);
+    }
+    .nav::-webkit-scrollbar { display: none; }
+
+    .nav a {
+      text-decoration: none;
+      white-space: nowrap;
+      background: #fff;
+      color: var(--primary);
+      border: 1px solid var(--line);
+      padding: 10px 16px;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 700;
+      box-shadow: 0 2px 5px rgba(0,0,0,.02);
+      transition: all 0.2s;
+    }
+    .nav a:active { transform: scale(0.95); background: var(--primary); color: #fff; }
+
+    .grid { display: grid; grid-template-columns: 1fr; gap: 16px; }
+
+    .card {
+      background: var(--card);
+      border-radius: 24px;
+      padding: 20px 18px;
+      box-shadow: var(--shadow);
+      border: 1px solid #edebe8;
+      margin-bottom: 10px;
+    }
+
+    .card h2 { margin: 0 0 4px; font-size: 20px; color: var(--primary); display: flex; justify-content: space-between; align-items: center; letter-spacing: 0.5px; }
+    .card .progress-text { font-size: 11px; font-weight: 800; color: var(--text); background: #f0ede9; padding: 2px 10px; border-radius: 12px; }
+
+    .section { border-top: 1px solid var(--line); padding-top: 16px; margin-top: 16px; }
+    .section:first-of-type { border-top: none; padding-top: 0; margin-top: 0; }
+
+    .section-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 15px;
+      font-weight: 800;
+      margin: 0 0 12px;
+      color: var(--primary);
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 4px;
+      font-size: 10px;
+      font-weight: 800;
+      color: #fff;
+      background: var(--primary);
+      text-transform: uppercase;
+    }
+
+    .checklist { list-style: none; padding: 0; margin: 0; }
+
+    .checklist li {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 12px 8px;
+      border-bottom: 1px solid #f7f6f4;
+      cursor: pointer;
+      transition: background 0.2s;
+      border-radius: 8px;
+    }
+    .checklist li:active { background: #fcfbf9; }
+    .checklist li:last-child { border-bottom: none; }
+
+    .checklist input[type="checkbox"] {
+      margin-top: 3px;
+      width: 18px;
+      height: 18px;
+      accent-color: var(--primary);
+      flex: 0 0 auto;
+      pointer-events: none;
+      filter: grayscale(1);
+    }
+
+    .item-text { flex: 1; font-size: 15px; transition: color 0.2s; font-weight: 500; }
+    input:checked + .item-text { color: var(--muted); text-decoration: line-through; opacity: 0.5; }
+
+    .muted { color: var(--muted); font-size: 12px; font-weight: normal; }
+
+    /* 動態新增項目的輸入框 */
+    .add-more-input {
+      display: flex;
+      gap: 6px;
+      margin-top: 8px;
+      padding: 0 8px;
+    }
+    .add-more-input input {
+      flex: 1;
+      border: 1px dashed var(--line);
+      border-radius: 6px;
+      padding: 6px 10px;
+      font-size: 13px;
+      outline: none;
+      background: #fafafa;
+    }
+    .add-more-input input:focus { border-style: solid; border-color: var(--primary); background: #fff; }
+    .add-more-btn {
+      background: var(--bg);
+      color: var(--primary);
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      width: 32px;
+      height: 32px;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    /* 記帳區樣式 */
+    .ledger-inputs { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
+    .input-row { display: flex; gap: 8px; }
+    .ledger-inputs input { 
+      border: 1px solid var(--line); 
+      border-radius: 8px; 
+      padding: 10px; 
+      font-size: 14px;
+      outline: none;
+    }
+    .ledger-inputs input:focus { border-color: var(--primary); }
+    .input-item { flex: 2; }
+    .input-amount { flex: 1; }
+    
+    .currency-toggle {
+      display: flex;
+      background: #f0ede9;
+      padding: 4px;
+      border-radius: 8px;
+      gap: 4px;
+    }
+    .currency-btn {
+      flex: 1;
+      border: none;
+      padding: 6px;
+      font-size: 11px;
+      font-weight: 800;
+      border-radius: 6px;
+      background: transparent;
+      color: var(--muted);
+      cursor: pointer;
+    }
+    .currency-btn.active {
+      background: #fff;
+      color: var(--primary);
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+
+    .add-btn { 
+      background: var(--primary); 
+      color: white; 
+      border: none; 
+      border-radius: 8px; 
+      padding: 10px; 
+      font-weight: 800; 
+      cursor: pointer;
+    }
+
+    .ledger-list { list-style: none; padding: 0; margin: 0; }
+    .ledger-row { 
+      display: flex; 
+      justify-content: space-between; 
+      padding: 10px 8px; 
+      border-bottom: 1px solid #f7f6f4; 
+      font-size: 14px;
+      align-items: center;
+    }
+    .ledger-row .name { flex: 1; font-weight: 500; }
+    .ledger-row .amount-box { text-align: right; margin-right: 12px; }
+    .ledger-row .val { font-weight: 800; display: block; }
+    .ledger-row .unit { font-size: 10px; color: var(--muted); font-weight: 800; }
+    .del-btn-small { color: #ccc; cursor: pointer; padding: 4px; font-size: 18px; }
+    .del-btn-small:hover { color: var(--text); }
+    
+    .total-summary {
+      margin-top: 16px;
+      background: #fcfbf9;
+      border-radius: 12px;
+      padding: 12px;
+      border: 1px dashed var(--line);
+    }
+    .total-row { 
+      display: flex; 
+      justify-content: space-between;
+      font-weight: 800;
+      font-size: 14px;
+      margin-bottom: 4px;
+    }
+    .total-row:last-child { margin-bottom: 0; }
+
+    .reset-btn {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: #fff;
+      color: var(--primary);
+      border: 1px solid var(--primary);
+      padding: 12px 24px;
+      border-radius: 999px;
+      font-weight: 800;
+      font-size: 14px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      z-index: 1000;
+      backdrop-filter: blur(4px);
+      cursor: pointer;
+    }
+
+    @media (min-width: 760px) {
+      .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; }
+      .grid { gap: 24px; }
+    }
+  </style>
+</head>
+<body>
+
+  <button class="reset-btn" onclick="resetAll()">RESET</button>
+
+  <div class="wrap">
+    <div class="header">
+      <h1>品inㄉ摳粒亞list</h1>
+      <p>3/12 - 3/16 · SEOUL, KOREA ✈️</p>
+    </div>
+
+    <div class="nav">
+      <a href="#ledger">💰 隨時記帳</a>
+      <a href="#gift">🎁 伴手禮</a>
+      <a href="#buy">🛍️ 個人清單</a>
+      <a href="#pack">🎒 行李 CHECK</a>
+    </div>
+
+    <div class="grid">
+      <!-- 記帳區 -->
+      <div class="card" id="ledger">
+        <h2>隨時記帳 <span class="progress-text">LEDGER</span></h2>
+        <div class="ledger-inputs">
+          <div class="input-row">
+            <input type="text" id="ledger-item" class="input-item" placeholder="項目 (例: 咖啡)">
+          </div>
+          <div class="input-row">
+            <input type="number" id="ledger-amount" class="input-amount" placeholder="金額">
+            <div class="currency-toggle">
+              <button id="btn-krw" class="currency-btn active" onclick="setCurrency('KRW')">KRW</button>
+              <button id="btn-twd" class="currency-btn" onclick="setCurrency('TWD')">TWD</button>
+            </div>
+            <button class="add-btn" onclick="addLedgerItem()">ADD</button>
+          </div>
+        </div>
+        
+        <div id="ledger-items-container">
+          <ul class="ledger-list" id="ledger-list">
+            <!-- 記帳項目 -->
+          </ul>
+          
+          <div class="total-summary">
+            <div class="total-row">
+              <span>KRW TOTAL</span>
+              <span id="total-krw">0</span>
+            </div>
+            <div class="total-row">
+              <span>TWD TOTAL</span>
+              <span id="total-twd">0</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 伴手禮清單 -->
+      <div class="card" id="gift">
+        <h2>伴手禮清單 <span class="progress-text" id="prog-gift">0%</span></h2>
+        <div class="two-col">
+          <div class="section">
+            <div class="section-title">OY (藥妝) <span class="badge">Olive Young</span></div>
+            <ul class="checklist" id="list-g-oy">
+              <li><input type="checkbox" id="g-oy-1"><div class="item-text">乃哥 面膜</div></li>
+              <li><input type="checkbox" id="g-oy-2"><div class="item-text">衣淇 護手霜</div></li>
+              <li><input type="checkbox" id="g-oy-3"><div class="item-text">佳雯 保養</div></li>
+              <li><input type="checkbox" id="g-oy-4"><div class="item-text">志展的媽 面膜</div></li>
+              <li><input type="checkbox" id="g-oy-5"><div class="item-text">媽媽要的 S Nature AQUA</div></li>
+            </ul>
+            <div class="add-more-input">
+              <input type="text" placeholder="新增項目..." onkeydown="if(event.key==='Enter') addCustomItem('list-g-oy', this)">
+              <button class="add-more-btn" onclick="addCustomItem('list-g-oy', this.previousElementSibling)">+</button>
+            </div>
+          </div>
+          <div class="section">
+            <div class="section-title">LOTTE (超市/食品) <span class="badge tag-yellow">LOTTE MART</span></div>
+            <ul class="checklist" id="list-g-lt">
+              <li><input type="checkbox" id="g-lt-1"><div class="item-text">同事伴手禮 (20小包)</div></li>
+              <li><input type="checkbox" id="g-lt-2"><div class="item-text">盧志 & 女友</div></li>
+              <li><input type="checkbox" id="g-lt-3"><div class="item-text">文揚 & 玉婷</div></li>
+              <li><input type="checkbox" id="g-lt-4"><div class="item-text">敏嘖 & 夏</div></li>
+              <li><input type="checkbox" id="g-lt-5"><div class="item-text">采玲</div></li>
+              <li><input type="checkbox" id="g-lt-6"><div class="item-text">Iris 零食/吉伊卡哇</div></li>
+              <li><input type="checkbox" id="g-lt-7"><div class="item-text">陳則宇</div></li>
+            </ul>
+            <div class="add-more-input">
+              <input type="text" placeholder="新增項目..." onkeydown="if(event.key==='Enter') addCustomItem('list-g-lt', this)">
+              <button class="add-more-btn" onclick="addCustomItem('list-g-lt', this.previousElementSibling)">+</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 個人購物清單 -->
+      <div class="card" id="buy">
+        <h2>個人清單 <span class="progress-text" id="prog-buy">0%</span></h2>
+        <div class="two-col">
+          <div class="section">
+            <div class="section-title">衣服鞋包 <span class="badge">FASHION</span></div>
+            <ul class="checklist" id="list-b-f">
+              <li><input type="checkbox" id="b-1"><div class="item-text">志展衣服 KODAK</div></li>
+              <li><input type="checkbox" id="b-2"><div class="item-text">Yoyo Stand oil (HOBO Bag)</div></li>
+              <li><input type="checkbox" id="b-3"><div class="item-text">Discovery 麻糬鞋 (黑銀)</div></li>
+              <li><input type="checkbox" id="b-4"><div class="item-text">Coach 看包</div></li>
+              <li><input type="checkbox" id="b-5"><div class="item-text">Gentle Monster 墨鏡</div></li>
+            </ul>
+            <div class="add-more-input">
+              <input type="text" placeholder="新增項目..." onkeydown="if(event.key==='Enter') addCustomItem('list-b-f', this)">
+              <button class="add-more-btn" onclick="addCustomItem('list-b-f', this.previousElementSibling)">+</button>
+            </div>
+          </div>
+          <div class="section">
+            <div class="section-title">其他目標</div>
+            <ul class="checklist" id="list-b-o">
+              <li><input type="checkbox" id="b-6"><div class="item-text">韓服吉伊卡哇 (龍山 3F)</div></li>
+              <li><input type="checkbox" id="b-7"><div class="item-text">Helinox 露營用品</div></li>
+            </ul>
+            <div class="add-more-input">
+              <input type="text" placeholder="新增項目..." onkeydown="if(event.key==='Enter') addCustomItem('list-b-o', this)">
+              <button class="add-more-btn" onclick="addCustomItem('list-b-o', this.previousElementSibling)">+</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 行李 Check -->
+      <div class="card" id="pack">
+        <h2>行李 Check <span class="progress-text" id="prog-pack">0%</span></h2>
+        <div class="two-col">
+          <div class="section">
+            <div class="section-title">重要證件</div>
+            <ul class="checklist" id="list-p-i">
+              <li><input type="checkbox" id="p-1"><div class="item-text">護照 <span class="muted">(免簽)</span></div></li>
+              <li><input type="checkbox" id="p-2"><div class="item-text">信用卡 / 現金</div></li>
+              <li><input type="checkbox" id="p-3"><div class="item-text">WOWPASS / T-money</div></li>
+            </ul>
+            <div class="add-more-input">
+              <input type="text" placeholder="新增項目..." onkeydown="if(event.key==='Enter') addCustomItem('list-p-i', this)">
+              <button class="add-more-btn" onclick="addCustomItem('list-p-i', this.previousElementSibling)">+</button>
+            </div>
+          </div>
+          <div class="section">
+            <div class="section-title">個人用品 <span class="badge tag-green">PACKING</span></div>
+            <ul class="checklist" id="list-p-p">
+              <li><input type="checkbox" id="p-4"><div class="item-text">充電線 / 行動電源</div></li>
+              <li><input type="checkbox" id="p-5"><div class="item-text">轉接延長線 <span class="muted">(必備)</span></div></li>
+              <li><input type="checkbox" id="p-6"><div class="item-text">牙刷組 / 沖牙機</div></li>
+              <li><input type="checkbox" id="p-7"><div class="item-text">浴巾 / 衣架</div></li>
+              <li><input type="checkbox" id="p-8"><div class="item-text">保養品 / 化妝品</div></li>
+              <li><input type="checkbox" id="p-9"><div class="item-text">外套</div></li>
+            </ul>
+            <div class="add-more-input">
+              <input type="text" placeholder="新增項目..." onkeydown="if(event.key==='Enter') addCustomItem('list-p-p', this)">
+              <button class="add-more-btn" onclick="addCustomItem('list-p-p', this.previousElementSibling)">+</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let ledgerData = [];
+    let customItems = {}; // { listId: [{id, text, checked}] }
+    let currentCurrency = 'KRW';
+
+    function init() {
+      // 讀取自定義項目
+      const savedCustom = localStorage.getItem('seoul_custom_items');
+      if (savedCustom) {
+        customItems = JSON.parse(savedCustom);
+        Object.keys(customItems).forEach(listId => {
+          const listEl = document.getElementById(listId);
+          if (listEl) {
+            customItems[listId].forEach(item => renderCustomItem(listId, item));
+          }
+        });
+      }
+
+      // 初始化所有勾選框 (包括原本的和自定義的)
+      attachCheckboxListeners();
+
+      // 初始化記帳數據
+      const savedLedger = localStorage.getItem('seoul_ledger_data');
+      if (savedLedger) {
+        ledgerData = JSON.parse(savedLedger);
+        renderLedger();
+      }
+
+      updateProgress();
+    }
+
+    function attachCheckboxListeners() {
+      const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+      checkboxes.forEach(cb => {
+        // 防止重複綁定
+        if (cb.dataset.listener) return;
+        
+        const checked = localStorage.getItem(cb.id) === 'true';
+        cb.checked = checked;
+        
+        cb.closest('li').onclick = function(e) {
+          if (e.target.tagName === 'INPUT') return;
+          cb.checked = !cb.checked;
+          saveCheckboxState(cb);
+          updateProgress();
+        };
+        cb.dataset.listener = "true";
+      });
+    }
+
+    function saveCheckboxState(cb) {
+      localStorage.setItem(cb.id, cb.checked);
+      // 如果是自定義項目，同步更新 customItems 對象
+      if (cb.id.startsWith('custom-')) {
+        const parts = cb.id.split('--');
+        const listId = parts[1];
+        const itemId = parts[2];
+        if (customItems[listId]) {
+          const item = customItems[listId].find(i => i.id == itemId);
+          if (item) item.checked = cb.checked;
+          saveCustomToStorage();
+        }
+      }
+    }
+
+    // 動態新增清單項目
+    function addCustomItem(listId, inputEl) {
+      const text = inputEl.value.trim();
+      if (!text) return;
+
+      const newItem = {
+        id: Date.now(),
+        text: text,
+        checked: false
+      };
+
+      if (!customItems[listId]) customItems[listId] = [];
+      customItems[listId].push(newItem);
+      
+      renderCustomItem(listId, newItem);
+      saveCustomToStorage();
+      inputEl.value = '';
+      attachCheckboxListeners();
+      updateProgress();
+    }
+
+    function renderCustomItem(listId, item) {
+      const listEl = document.getElementById(listId);
+      const li = document.createElement('li');
+      const uniqueId = `custom--${listId}--${item.id}`;
+      li.innerHTML = `
+        <input type="checkbox" id="${uniqueId}" ${item.checked ? 'checked' : ''}>
+        <div class="item-text">${item.text}</div>
+      `;
+      listEl.appendChild(li);
+    }
+
+    function saveCustomToStorage() {
+      localStorage.setItem('seoul_custom_items', JSON.stringify(customItems));
+    }
+
+    function updateProgress() {
+      const groups = ['gift', 'buy', 'pack'];
+      groups.forEach(id => {
+        const container = document.getElementById(id);
+        const total = container.querySelectorAll('input[type="checkbox"]').length;
+        const checked = container.querySelectorAll('input[type="checkbox"]:checked').length;
+        const percent = total === 0 ? 0 : Math.round((checked / total) * 100);
+        document.getElementById(`prog-${id}`).innerText = `${percent}%`;
+      });
+    }
+
+    // 記帳相關功能
+    function setCurrency(cur) {
+      currentCurrency = cur;
+      document.getElementById('btn-krw').classList.toggle('active', cur === 'KRW');
+      document.getElementById('btn-twd').classList.toggle('active', cur === 'TWD');
+    }
+
+    function addLedgerItem() {
+      const itemInput = document.getElementById('ledger-item');
+      const amountInput = document.getElementById('ledger-amount');
+      const name = itemInput.value.trim();
+      const amount = parseInt(amountInput.value);
+
+      if (name && !isNaN(amount)) {
+        ledgerData.push({ 
+          id: Date.now(), 
+          name, 
+          amount, 
+          currency: currentCurrency 
+        });
+        itemInput.value = '';
+        amountInput.value = '';
+        saveLedger();
+        renderLedger();
+      }
+    }
+
+    function deleteLedgerItem(id) {
+      ledgerData = ledgerData.filter(item => item.id !== id);
+      saveLedger();
+      renderLedger();
+    }
+
+    function saveLedger() {
+      localStorage.setItem('seoul_ledger_data', JSON.stringify(ledgerData));
+    }
+
+    function renderLedger() {
+      const list = document.getElementById('ledger-list');
+      const totalKrwEl = document.getElementById('total-krw');
+      const totalTwdEl = document.getElementById('total-twd');
+      list.innerHTML = '';
+      
+      let sumKrw = 0;
+      let sumTwd = 0;
+
+      ledgerData.forEach(item => {
+        if (item.currency === 'KRW') sumKrw += item.amount;
+        else sumTwd += item.amount;
+
+        const li = document.createElement('li');
+        li.className = 'ledger-row';
+        li.innerHTML = `
+          <span class="name">${item.name}</span>
+          <div class="amount-box">
+            <span class="val">${item.amount.toLocaleString()}</span>
+            <span class="unit">${item.currency}</span>
+          </div>
+          <span class="del-btn-small" onclick="deleteLedgerItem(${item.id})">×</span>
+        `;
+        list.appendChild(li);
+      });
+
+      totalKrwEl.innerText = sumKrw.toLocaleString();
+      totalTwdEl.innerText = sumTwd.toLocaleString();
+    }
+
+    function resetAll() {
+      if(confirm('要清空所有勾選進度、自定義項目與記帳紀錄嗎？')) {
+        localStorage.clear();
+        location.reload();
+      }
+    }
+
+    window.onload = init;
+  </script>
+</body>
+</html>
